@@ -77,7 +77,7 @@ with st.expander("➕ Add Transaction", expanded=False):
     with st.form("transaction_form", clear_on_submit=True):
         date = st.date_input("Date")
         amount = st.number_input("Amount", min_value=0.01, step=1.0)
-        currency = st.selectbox("Currency", ["EUR", "CZK", "PLN", "GBP", "USD", "HUF"])
+        currency = st.selectbox("Currency", ["EUR", "USD", "MXN", "CZK", "PLN", "GBP", "HUF"])
         category = st.selectbox("Category", ["Food", "Rent", "Travel", "Fun", "Other"])
         desc = st.text_input("Description")
         

@@ -15,6 +15,7 @@ def normalize_currency(amount: float, currency: str) -> float:
         "PLN": 0.23,
         "GBP": 1.17,
         "USD": 0.92,
+        "MXN": 0.054, # Approx rate
         "HUF": 0.0026
     }
     return round(amount * rates.get(currency, 1.0), 2)
