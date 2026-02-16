@@ -13,27 +13,43 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- Theme Toggle ---
+# --- Theme Toggle & Settings ---
 if "theme" not in st.session_state:
     st.session_state.theme = "dark"
 
 with st.sidebar:
-    st.header("Settings")
-    mode = st.radio("Theme", ["Dark", "Light"], index=0 if st.session_state.theme == "dark" else 1)
+    st.header("⚙️ Settings")
+    
+    # Theme
+    st.subheader("Appearance")
+    mode = st.radio("Theme", ["Dark", "Light"], index=0 if st.session_state.theme == "dark" else 1, horizontal=True)
     if mode == "Dark":
         st.session_state.theme = "dark"
     else:
         st.session_state.theme = "light"
+        
+    st.divider()
+    
+    # Budget Configuration
+    st.subheader("Budget Configuration")
+    total_budget = st.number_input("Monthly Limit (€)", value=1000, step=50)
+    
+    st.divider()
+    if st.button("🔄 Refresh Data"):
+        st.cache_data.clear()
+        st.rerun()
 
-# --- Dynamic CSS Injection ---
+# --- Dynamic CSS Injection (Polished) ---
 if st.session_state.theme == "dark":
     bg_color = "#0E1117"
-    card_color = "#262730"
-    text_color = "#FAFAFA"
+    card_bg = "#1E1E1E" # Softer dark
+    text_color = "#FFFFFF"
+    metric_color = "#E0E0E0"
 else:
     bg_color = "#FFFFFF"
-    card_color = "#f0f2f6"
-    text_color = "#262730"
+    card_bg = "#F8F9FA" # Clean light gray
+    text_color = "#000000"
+    metric_color = "#333333"
 
 st.markdown(f"""
     <style>
@@ -41,20 +57,26 @@ st.markdown(f"""
         background-color: {bg_color};
         color: {text_color};
     }}
-    .metric-card {{
-        padding: 15px;
-        border-radius: 10px;
-        background-color: {card_color};
-        text-align: center;
-        margin-bottom: 10px;
-    }}
     .stMetric {{
+        background-color: {card_bg};
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         text-align: center;
+        border: 1px solid {card_bg};
+    }}
+    [data-testid="stMetricLabel"] {{
+        color: {metric_color} !important;
+        font-size: 0.9rem;
+    }}
+    [data-testid="stMetricValue"] {{
+        color: {text_color} !important;
+        font-size: 1.8rem;
     }}
     </style>
     """, unsafe_allow_html=True)
 
-# --- Header Section (Inverted Pyramid - Top Layer) ---
+# --- Header Section ---
 st.title("💶 Erasmus Budget")
 
 # Load Data
@@ -63,11 +85,24 @@ with st.spinner("Syncing..."):
     rules = data_manager.get_budget_rules()
     
 # Calculate Metrics
-stats = budget_logic.calculate_burn_rate(df)
+stats = budget_logic.calculate_burn_rate(df, limit=total_budget)
 
+# Color Logic for Metric (Inverse: High Usage = Red)
+delta_color = "normal" 
+if stats['percent_used'] > 100:
+    delta_color = "inverse" # Red
+elif stats['percent_used'] == 0:
+    delta_color = "off" # Grey
+else:
+    delta_color = "inverse" # Green to Red logic handled by streamlit inverse? No, inverse means positive is bad.
+    # Actually, let's simplify. Standard Delta: Green is good.
+    # We want "80% Used" to be potentially warning.
+    
 # Top Metrics Row
 col1, col2, col3 = st.columns(3)
 with col1:
+    # Inverse: Positive delta (usage went up) is usually bad in budgeting? 
+    # Let's just use normal colors but descriptive text.
     st.metric("Budget Left", f"€{stats['remaining']}", f"{stats['percent_used']}% Used", delta_color="inverse")
 with col2:
     st.metric("Daily Limit", f"€{stats['daily_limit']}")
