@@ -13,23 +13,44 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- CSS for Mobile Optimization ---
-st.markdown("""
+# --- Theme Toggle ---
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
+
+with st.sidebar:
+    st.header("Settings")
+    mode = st.radio("Theme", ["Dark", "Light"], index=0 if st.session_state.theme == "dark" else 1)
+    if mode == "Dark":
+        st.session_state.theme = "dark"
+    else:
+        st.session_state.theme = "light"
+
+# --- Dynamic CSS Injection ---
+if st.session_state.theme == "dark":
+    bg_color = "#0E1117"
+    card_color = "#262730"
+    text_color = "#FAFAFA"
+else:
+    bg_color = "#FFFFFF"
+    card_color = "#f0f2f6"
+    text_color = "#262730"
+
+st.markdown(f"""
     <style>
-    .stApp {
-        max-width: 100%;
-        padding: 1rem;
-    }
-    .metric-card {
+    .stApp {{
+        background-color: {bg_color};
+        color: {text_color};
+    }}
+    .metric-card {{
         padding: 15px;
         border-radius: 10px;
-        background-color: #262730;
+        background-color: {card_color};
         text-align: center;
         margin-bottom: 10px;
-    }
-    .stMetric {
+    }}
+    .stMetric {{
         text-align: center;
-    }
+    }}
     </style>
     """, unsafe_allow_html=True)
 
