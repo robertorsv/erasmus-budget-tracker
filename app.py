@@ -1,5 +1,7 @@
 # import budget_logic # Will be created later
 # import data_manager # Will be created later
+import streamlit as st
+import pandas as pd
 import budget_logic
 import data_manager
 
