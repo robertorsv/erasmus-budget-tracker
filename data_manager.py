@@ -24,7 +24,7 @@ def get_client():
                     st.secrets["gcp_service_account"], scopes=SCOPES
                 )
                 return gspread.authorize(creds)
-        except (FileNotFoundError, AttributeError):
+        except Exception:
             pass # Fallback to local file
 
         # Local development
